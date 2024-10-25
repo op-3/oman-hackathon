@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    domains: ["firebasestorage.googleapis.com"],
+  },
+  // إضافة CSP header للسماح بالاتصال مع Firebase
   async headers() {
     return [
       {
@@ -7,8 +11,16 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google.com;",
+            value: `
+              default-src 'self';
+              img-src 'self' blob: data: https://firebasestorage.googleapis.com;
+              script-src 'self' 'unsafe-eval' 'unsafe-inline';
+              style-src 'self' 'unsafe-inline';
+              font-src 'self';
+              connect-src 'self' https://*.firebaseio.com https://*.googleapis.com;
+            `
+              .replace(/\s+/g, " ")
+              .trim(),
           },
         ],
       },
