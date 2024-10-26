@@ -1,18 +1,19 @@
+import { db, storage } from "./config";
 import {
   collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
   doc,
   getDoc,
   getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
   Timestamp,
 } from "firebase/firestore";
-import { db, storage } from "./config";
 import { type Hackathon } from "../types";
+import { deleteImageFromStorage } from "./storage";
 
 export async function addHackathon(data: any) {
   try {
@@ -60,9 +61,22 @@ export async function addHackathon(data: any) {
   }
 }
 
-export async function updateHackathon(id: string, data: Partial<Hackathon>) {
+export async function updateHackathon(id: string, data: any) {
   try {
     const docRef = doc(db, "hackathons", id);
+
+    // جلب البيانات القديمة للهاكاثون
+    const oldDoc = await getDoc(docRef);
+    if (oldDoc.exists()) {
+      const oldData = oldDoc.data();
+
+      // إذا تم تغيير الصورة، نقوم بحذف الصورة القديمة
+      if (oldData.imageUrl && oldData.imageUrl !== data.imageUrl) {
+        await deleteImageFromStorage(oldData.imageUrl);
+      }
+    }
+
+    // تحديث بيانات الهاكاثون
     await updateDoc(docRef, {
       ...data,
       updatedAt: Timestamp.now(),
@@ -75,8 +89,21 @@ export async function updateHackathon(id: string, data: Partial<Hackathon>) {
 
 export async function deleteHackathon(id: string) {
   try {
-    const docRef = doc(db, "hackathons", id);
-    await deleteDoc(docRef);
+    // 1. جلب بيانات الهاكاثون لمعرفة URL الصورة
+    const hackathonDoc = await getDoc(doc(db, "hackathons", id));
+    if (!hackathonDoc.exists()) {
+      throw new Error("الهاكاثون غير موجود");
+    }
+
+    const hackathonData = hackathonDoc.data();
+
+    // 2. حذف الصورة من Storage إذا كانت موجودة
+    if (hackathonData.imageUrl) {
+      await deleteImageFromStorage(hackathonData.imageUrl);
+    }
+
+    // 3. حذف الهاكاثون من Firestore
+    await deleteDoc(doc(db, "hackathons", id));
   } catch (error) {
     console.error("Error deleting hackathon:", error);
     throw new Error("فشل في حذف الهاكاثون");

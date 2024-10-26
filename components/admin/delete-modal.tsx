@@ -11,50 +11,69 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { Button } from "../ui/button";
-import { Trash2Icon } from "lucide-react";
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Trash2Icon, Loader2 } from "lucide-react";
+import { deleteHackathon } from "@/lib/firebase/admin";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface DeleteModalProps {
-  onDelete: () => Promise<void>;
+  hackathonId: string;
+  hackathonTitle: string;
 }
 
-export function DeleteModal({ onDelete }: DeleteModalProps) {
+export function DeleteModal({ hackathonId, hackathonTitle }: DeleteModalProps) {
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleDelete = async () => {
     try {
       setLoading(true);
-      await onDelete();
+      await deleteHackathon(hackathonId);
+      toast.success("تم حذف الهاكاثون بنجاح");
+      setOpen(false);
+      router.refresh();
     } catch (error) {
-      console.error("Error deleting:", error);
+      console.error("Error deleting hackathon:", error);
+      toast.error("حدث خطأ في حذف الهاكاثون");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="icon">
+        <Button variant="destructive" size="sm">
           <Trash2Icon className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
+          <AlertDialogTitle>تأكيد حذف الهاكاثون</AlertDialogTitle>
           <AlertDialogDescription>
-            هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الهاكاثون نهائياً.
+            هل أنت متأكد من حذف &quot;{hackathonTitle}&quot;؟
+            <br />
+            لا يمكن التراجع عن هذا الإجراء.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>إلغاء</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
+            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             disabled={loading}
-            className="bg-red-600 hover:bg-red-700"
           >
-            {loading ? "جاري الحذف..." : "حذف"}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                جاري الحذف...
+              </div>
+            ) : (
+              "حذف"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getAllHackathons, deleteHackathon } from "@/lib/firebase/admin";
-import { Hackathon } from "@/lib/types";
+import { getAllHackathons } from "@/lib/firebase/admin";
 import toast from "react-hot-toast";
+import { DeleteModal } from "@/components/admin/delete-modal";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
 
 export default function DashboardPage() {
-  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [hackathons, setHackathons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -22,87 +25,155 @@ export default function DashboardPage() {
       const data = await getAllHackathons();
       setHackathons(data);
     } catch (error) {
+      console.error("Error loading hackathons:", error);
       toast.error("حدث خطأ في تحميل البيانات");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("هل أنت متأكد من حذف هذا الهاكاثون؟")) {
-      try {
-        await deleteHackathon(id);
-        toast.success("تم حذف الهاكاثون بنجاح");
-        await loadHackathons();
-      } catch (error) {
-        toast.error("حدث خطأ في حذف الهاكاثون");
-      }
-    }
-  };
+  const formatDate = (timestamp: Timestamp | Date | null) => {
+    try {
+      if (!timestamp) return "تاريخ غير محدد";
 
-  const formatDate = (date: any) => {
-    if (!date) return "--";
-    if (date instanceof Date) {
-      return date.toLocaleDateString("ar-OM");
+      const date =
+        timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+      return date.toLocaleDateString("ar-OM", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "تاريخ غير محدد";
     }
-    // إذا كان التاريخ من Firestore Timestamp
-    if (date.toDate) {
-      return date.toDate().toLocaleDateString("ar-OM");
-    }
-    // إذا كان string
-    return new Date(date).toLocaleDateString("ar-OM");
   };
 
   if (loading) {
-    return <div className="text-center py-12">جاري التحميل...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">لوحة التحكم</h1>
-        <Link
-          href="/admin/add"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          إضافة هاكاثون جديد
-        </Link>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="bg-white rounded-lg shadow">
+          {/* رأس الصفحة */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900">لوحة التحكم</h1>
+              <Button
+                onClick={() => router.push("/admin/add")}
+                className="flex items-center gap-2"
+              >
+                <PlusCircle className="h-5 w-5" />
+                إضافة هاكاثون جديد
+              </Button>
+            </div>
+          </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-right">العنوان</th>
-              <th className="px-6 py-3 text-right">المنظم</th>
-              <th className="px-6 py-3 text-right">التاريخ</th>
-              <th className="px-6 py-3 text-right">الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {hackathons.map((hackathon) => (
-              <tr key={hackathon.id}>
-                <td className="px-6 py-4">{hackathon.title}</td>
-                <td className="px-6 py-4">{hackathon.organizer}</td>
-                <td className="px-6 py-4">{formatDate(hackathon.startDate)}</td>
-                <td className="px-6 py-4 space-x-2">
-                  <Link
-                    href={`/admin/hackathons/${hackathon.id}/edit`}
-                    className="text-blue-600 hover:text-blue-800 ml-2"
+          {/* جدول الهاكاثونات */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    تعديل
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(hackathon.id)}
-                    className="text-red-600 hover:text-red-800"
+                    العنوان
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    حذف
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    المنظم
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    التاريخ
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    الحالة
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    الإجراءات
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {hackathons.map((hackathon) => (
+                  <tr key={hackathon.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {hackathon.title}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {hackathon.organizer}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {formatDate(hackathon.startDate)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          hackathon.status === "upcoming"
+                            ? "bg-blue-100 text-blue-800"
+                            : hackathon.status === "ongoing"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {hackathon.status === "upcoming" && "قادم"}
+                        {hackathon.status === "ongoing" && "جاري"}
+                        {hackathon.status === "completed" && "منتهي"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center gap-2 justify-end">
+                        <Link
+                          href={`/admin/edit/${hackathon.id}`}
+                          className="text-blue-600 hover:text-blue-900 transition-colors"
+                        >
+                          تعديل
+                        </Link>
+                        <DeleteModal
+                          hackathonId={hackathon.id}
+                          hackathonTitle={hackathon.title}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* حالة عدم وجود بيانات */}
+            {hackathons.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-sm">
+                  لا توجد هاكاثونات حالياً
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

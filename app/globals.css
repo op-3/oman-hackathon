@@ -10,6 +10,8 @@
     --card: #ffffff;
     --card-foreground: #000000;
 
+    --swiper-theme-color: #3b82f6;
+
     --popover: #ffffff;
     --popover-foreground: #000000;
 
@@ -64,6 +66,30 @@
     --input: #292524;
     --ring: #3b82f6;
   }
+}
+.swiper {
+  padding: 50px 0;
+}
+.swiper-slide {
+  background-position: center;
+  background-size: cover;
+  width: 300px;
+  height: 400px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+.animate-pulse {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @layer base {

@@ -2,9 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, ArrowLeft, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import HackathonForm from "@/components/admin/hackathon-form";
 import { getHackathonById, updateHackathon } from "@/lib/firebase/admin";
-import toast from "react-hot-toast";
+import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 interface PageProps {
   params: {
@@ -15,7 +21,9 @@ interface PageProps {
 export default function EditHackathonPage({ params }: PageProps) {
   const [hackathon, setHackathon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (params.id) {
@@ -29,35 +37,41 @@ export default function EditHackathonPage({ params }: PageProps) {
       const data = await getHackathonById(params.id);
 
       if (!data) {
-        toast.error("الهاكاثون غير موجود");
+        toast({
+          variant: "destructive",
+          title: "خطأ",
+          description: "الهاكاثون غير موجود",
+        });
         router.push("/admin/dashboard");
         return;
       }
 
-      // تنسيق التواريخ للنموذج
       setHackathon({
         ...data,
-        startDate:
-          data.startDate instanceof Date
-            ? data.startDate.toISOString().split("T")[0]
-            : new Date(data.startDate).toISOString().split("T")[0],
-        endDate:
-          data.endDate instanceof Date
-            ? data.endDate.toISOString().split("T")[0]
-            : new Date(data.endDate).toISOString().split("T")[0],
+        startDate: formatDate(data.startDate),
+        endDate: formatDate(data.endDate),
       });
     } catch (error) {
       console.error("Error loading hackathon:", error);
-      toast.error("حدث خطأ في تحميل البيانات");
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: "حدث خطأ في تحميل البيانات",
+      });
       router.push("/admin/dashboard");
     } finally {
       setLoading(false);
     }
   };
 
+  const formatDate = (date: Date | string) => {
+    const d = date instanceof Date ? date : new Date(date);
+    return d.toISOString().split("T")[0];
+  };
+
   const handleSubmit = async (data: any) => {
     try {
-      setLoading(true);
+      setSaving(true);
       await updateHackathon(params.id, {
         ...data,
         startDate: new Date(data.startDate),
@@ -65,48 +79,116 @@ export default function EditHackathonPage({ params }: PageProps) {
         updatedAt: new Date(),
       });
 
-      toast.success("تم تحديث الهاكاثون بنجاح");
+      toast({
+        title: "تم التحديث",
+        description: "تم تحديث الهاكاثون بنجاح",
+      });
       router.push("/admin/dashboard");
     } catch (error) {
       console.error("Error updating hackathon:", error);
-      toast.error("حدث خطأ في تحديث الهاكاثون");
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: "حدث خطأ في تحديث الهاكاثون",
+      });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!hackathon) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <p className="text-lg text-muted-foreground">
-            لم يتم العثور على الهاكاثون
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const handleBack = () => {
+    router.push("/admin/dashboard");
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">تعديل الهاكاثون</h1>
-        <HackathonForm
-          initialData={hackathon}
-          onSubmit={handleSubmit}
-          isLoading={loading}
-        />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="min-h-screen bg-gradient-to-b from-background to-secondary/10 p-6"
+    >
+      <div className="max-w-4xl mx-auto">
+        <Button
+          variant="ghost"
+          className="mb-6"
+          onClick={handleBack}
+          disabled={loading || saving}
+        >
+          <ArrowLeft className="ml-2 h-4 w-4" />
+          العودة للوحة التحكم
+        </Button>
+
+        <Card className="backdrop-blur-sm bg-background/95">
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold text-primary">
+              تعديل الهاكاثون
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center justify-center py-12"
+                >
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="mt-4 text-muted-foreground">
+                    جاري تحميل البيانات...
+                  </p>
+                </motion.div>
+              ) : !hackathon ? (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      لم يتم العثور على الهاكاثون المطلوب
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <HackathonForm
+                    initialData={hackathon}
+                    onSubmit={handleSubmit}
+                    isLoading={saving}
+                  />
+                  <div className="mt-6 flex justify-end">
+                    <Button
+                      type="submit"
+                      form="hackathon-form"
+                      disabled={saving}
+                      className={cn("min-w-[140px]", saving && "animate-pulse")}
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                          جاري الحفظ...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="ml-2 h-4 w-4" />
+                          حفظ التغييرات
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </motion.div>
   );
 }

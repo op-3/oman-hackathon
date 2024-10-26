@@ -1,98 +1,174 @@
+"use client";
+
 import Image from "next/image";
-import { Calendar, MapPin, User } from "lucide-react";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
+import { motion } from "framer-motion";
+import { Calendar, MapPin, User, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { HackathonDetailsDialog } from "./hackathon-details-dialog";
+import { Timestamp } from "firebase/firestore";
 
 interface HackathonCardProps {
-  hackathon: any;
+  hackathon: {
+    id: string;
+    title: string;
+    description: string;
+    startDate: Timestamp | Date;
+    endDate: Timestamp | Date;
+    location: string;
+    organizer: string;
+    registrationLink: string;
+    imageUrl: string;
+    status: "upcoming" | "ongoing" | "completed";
+  };
 }
 
 export function HackathonCard({ hackathon }: HackathonCardProps) {
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "upcoming":
-        return { text: "قادم", variant: "info" as const };
-      case "ongoing":
-        return { text: "جاري", variant: "success" as const };
-      case "completed":
-        return { text: "منتهي", variant: "secondary" as const };
-      default:
-        return { text: status, variant: "default" as const };
+  const formatDate = (timestamp: Timestamp | Date) => {
+    try {
+      const date =
+        timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+      return date.toLocaleDateString("ar-OM", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "تاريخ غير محدد";
     }
   };
 
-  const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString("ar-OM", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "upcoming":
+        return {
+          text: "قادم",
+          variant: "info" as const,
+          className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+        };
+      case "ongoing":
+        return {
+          text: "جاري",
+          variant: "success" as const,
+          className: "bg-green-500/10 text-green-500 border-green-500/20",
+        };
+      case "completed":
+        return {
+          text: "منتهي",
+          variant: "secondary" as const,
+          className: "bg-gray-500/10 text-gray-300 border-gray-500/20",
+        };
+      default:
+        return {
+          text: status,
+          variant: "default" as const,
+          className: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+        };
+    }
   };
 
-  const status = getStatusBadge(hackathon.status);
+  const status = getStatusConfig(hackathon.status);
+  const isCompleted = hackathon.status === "completed";
 
   return (
-    <div className="group bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.3 }}
+      className={`group relative bg-white/5 backdrop-blur-lg rounded-xl overflow-hidden border border-white/10 hover:border-white/20 transition-all ${
+        isCompleted ? "grayscale" : ""
+      }`}
+    >
       {/* صورة الهاكاثون */}
-      <div className="relative aspect-video">
+      <div className="relative aspect-[16/9] overflow-hidden">
         <Image
-          src={hackathon.imageUrl || "/placeholder.png"}
+          src={hackathon.imageUrl || "/placeholder.jpg"}
           alt={hackathon.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute top-4 right-4">
-          <Badge variant={status.variant}>{status.text}</Badge>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-          <h3 className="text-xl font-bold text-white mb-2 line-clamp-1">
-            {hackathon.title}
-          </h3>
-          <p className="text-white/90 text-sm line-clamp-2">
-            {hackathon.description}
-          </p>
-        </div>
+        <div
+          className={`absolute inset-0 bg-gradient-to-t ${
+            isCompleted
+              ? "from-black/90 via-black/60 to-black/30"
+              : "from-black/80 via-black/30 to-transparent"
+          }`}
+        />
+
+        {/* حالة الهاكاثون */}
+        <Badge
+          variant={status.variant}
+          className={`absolute top-4 right-4 ${status.className}`}
+        >
+          {status.text}
+        </Badge>
       </div>
 
-      {/* معلومات الهاكاثون */}
-      <div className="p-4 space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <User className="w-4 h-4" />
-            <span>{hackathon.organizer}</span>
+      {/* محتوى الكارد */}
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-white mb-3 line-clamp-1">
+          {hackathon.title}
+        </h3>
+
+        <p
+          className={`mb-4 line-clamp-2 ${
+            isCompleted ? "text-gray-500" : "text-gray-400"
+          }`}
+        >
+          {hackathon.description}
+        </p>
+
+        <div className="space-y-2 mb-6">
+          <div className="flex items-center text-sm text-gray-400">
+            <Calendar className="w-4 h-4 ml-2 shrink-0" />
+            <span className="truncate">{formatDate(hackathon.startDate)}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            <span>{hackathon.location}</span>
+
+          <div className="flex items-center text-sm text-gray-400">
+            <MapPin className="w-4 h-4 ml-2 shrink-0" />
+            <span className="truncate">{hackathon.location}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            <span>{formatDate(hackathon.startDate)}</span>
+
+          <div className="flex items-center text-sm text-gray-400">
+            <User className="w-4 h-4 ml-2 shrink-0" />
+            <span className="truncate">{hackathon.organizer}</span>
           </div>
         </div>
 
-        {/* أزرار التحكم */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <HackathonDetailsDialog
             hackathon={hackathon}
             trigger={
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className={`w-full bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 ${
+                  isCompleted ? "text-gray-400" : "text-white"
+                }`}
+              >
                 التفاصيل
               </Button>
             }
           />
-          <Button className="w-full" asChild>
-            <a
-              href={hackathon.registrationLink}
-              target="_blank"
-              rel="noopener noreferrer"
+
+          {!isCompleted && (
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+              asChild
             >
-              التسجيل
-            </a>
-          </Button>
+              <a
+                href={hackathon.registrationLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>التسجيل</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </Button>
+          )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
