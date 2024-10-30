@@ -1,12 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getHackathonById, updateHackathon } from "@/lib/firebase/admin";
-import {
-  uploadImageToStorage,
-  deleteImageFromStorage,
-} from "@/lib/firebase/storage";
+import { updateHackathon } from "@/lib/firebase/admin";
+import { deleteImageFromStorage } from "@/lib/firebase/storage";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,14 +11,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Loader2 } from "lucide-react";
 
-interface EditHackathonFormProps {
+interface Hackathon {
   id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  organizer: string;
+  registrationLink: string;
+  status: string;
+  imageUrl: string;
 }
 
-export default function EditHackathonForm({ id }: EditHackathonFormProps) {
+interface EditHackathonFormProps {
+  hackathon: Hackathon;
+}
+
+export default function EditHackathonForm({
+  hackathon,
+}: EditHackathonFormProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState<HackathonData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    ...hackathon,
+    startDate: new Date(hackathon.startDate).toISOString().split("T")[0],
+    endDate: new Date(hackathon.endDate).toISOString().split("T")[0],
+  });
 
   useEffect(() => {
     const loadHackathon = async () => {
