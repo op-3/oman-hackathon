@@ -3,6 +3,7 @@ const nextConfig = {
   images: {
     domains: ["firebasestorage.googleapis.com"],
   },
+
   async headers() {
     return [
       {
@@ -24,15 +25,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  env: {
-    DISABLE_ESLINT_PLUGIN: true,
   },
 };
 
