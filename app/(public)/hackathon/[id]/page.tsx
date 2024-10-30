@@ -6,10 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import HackathonForm from "@/components/admin/hackathon-form";
 import { getHackathonById, updateHackathon } from "@/lib/firebase/admin";
-
 import { cn } from "@/lib/utils";
 
 interface PageProps {
@@ -23,7 +21,6 @@ export default function EditHackathonPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (params.id) {
