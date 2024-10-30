@@ -6,10 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import HackathonForm from "@/components/admin/hackathon-form";
 import { getHackathonById, updateHackathon } from "@/lib/firebase/admin";
-import { useToast } from "@/components/ui/use-toast";
+
 import { cn } from "@/lib/utils";
 
 interface PageProps {
