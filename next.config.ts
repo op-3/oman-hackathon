@@ -31,6 +31,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    esmExternals: false,
+  },
 };
 
 module.exports = nextConfig;
