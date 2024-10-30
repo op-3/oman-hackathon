@@ -3,7 +3,7 @@ const nextConfig = {
   images: {
     domains: ["firebasestorage.googleapis.com"],
   },
-  // إضافة CSP header للسماح بالاتصال مع Firebase
+
   async headers() {
     return [
       {

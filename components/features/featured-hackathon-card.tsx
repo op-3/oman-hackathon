@@ -1,4 +1,3 @@
-// components/features/featured-hackathon-card.tsx
 "use client";
 
 import Image from "next/image";
@@ -7,6 +6,30 @@ import { Calendar, MapPin, Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HackathonDetailsDialog } from "../public/hackathon-details-dialog";
+import { useLanguage } from "@/lib/context/language-context";
+
+const translations = {
+  ar: {
+    unknownDate: "تاريخ غير محدد",
+    status: {
+      upcoming: "قادم",
+      ongoing: "جاري",
+      completed: "منتهي",
+    },
+    viewDetails: "عرض التفاصيل",
+    registerNow: "سجل الآن",
+  },
+  en: {
+    unknownDate: "Unknown Date",
+    status: {
+      upcoming: "Upcoming",
+      ongoing: "Ongoing",
+      completed: "Completed",
+    },
+    viewDetails: "View Details",
+    registerNow: "Register Now",
+  },
+};
 
 interface FeaturedHackathonCardProps {
   hackathon: any;
@@ -15,15 +38,21 @@ interface FeaturedHackathonCardProps {
 export function FeaturedHackathonCard({
   hackathon,
 }: FeaturedHackathonCardProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const formatDate = (date: any) => {
     try {
-      return new Date(date).toLocaleDateString("ar-OM", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+      return new Date(date).toLocaleDateString(
+        language === "ar" ? "ar-OM" : "en-US",
+        {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }
+      );
     } catch (error) {
-      return "تاريخ غير محدد";
+      return t.unknownDate;
     }
   };
 
@@ -31,17 +60,17 @@ export function FeaturedHackathonCard({
     switch (status) {
       case "upcoming":
         return {
-          text: "قادم",
+          text: t.status.upcoming,
           className: "bg-blue-500/20 text-blue-400 border-blue-500/30",
         };
       case "ongoing":
         return {
-          text: "جاري",
+          text: t.status.ongoing,
           className: "bg-green-500/20 text-green-400 border-green-500/30",
         };
       case "completed":
         return {
-          text: "منتهي",
+          text: t.status.completed,
           className: "bg-gray-500/20 text-gray-400 border-gray-500/30",
         };
       default:
@@ -71,7 +100,13 @@ export function FeaturedHackathonCard({
         {/* Content Section */}
         <div className="relative flex-1 p-6 md:p-8">
           {/* Status Badge */}
-          <Badge className={status.className}>{status.text}</Badge>
+          <Badge
+            className={`${status.className} ${
+              language === "ar" ? "mr-0" : "ml-0"
+            }`}
+          >
+            {status.text}
+          </Badge>
 
           {/* Title */}
           <h3 className="text-2xl font-bold mt-4 mb-3 text-white">
@@ -105,8 +140,12 @@ export function FeaturedHackathonCard({
               hackathon={hackathon}
               trigger={
                 <Button variant="outline" className="group">
-                  <span>عرض التفاصيل</span>
-                  <ArrowRight className="w-4 h-4 mr-2 transition-transform group-hover:translate-x-1" />
+                  <span>{t.viewDetails}</span>
+                  <ArrowRight
+                    className={`w-4 h-4 ${
+                      language === "ar" ? "mr-2" : "ml-2"
+                    } transition-transform group-hover:translate-x-1`}
+                  />
                 </Button>
               }
             />
@@ -117,7 +156,7 @@ export function FeaturedHackathonCard({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  سجل الآن
+                  {t.registerNow}
                 </a>
               </Button>
             )}

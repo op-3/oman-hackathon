@@ -6,70 +6,119 @@
   :root {
     --background: #ffffff;
     --foreground: #000000;
-
     --card: #ffffff;
     --card-foreground: #000000;
-
     --swiper-theme-color: #3b82f6;
-
     --popover: #ffffff;
     --popover-foreground: #000000;
-
     --primary: #3b82f6;
     --primary-foreground: #ffffff;
-
     --secondary: #f3f4f6;
     --secondary-foreground: #1f2937;
-
     --muted: #f3f4f6;
     --muted-foreground: #6b7280;
-
     --accent: #f3f4f6;
     --accent-foreground: #1f2937;
-
     --destructive: #dc2626;
     --destructive-foreground: #ffffff;
-
     --border: #e5e7eb;
     --input: #e5e7eb;
     --ring: #3b82f6;
-
     --radius: 0.5rem;
   }
 
   .dark {
     --background: #0c0a09;
     --foreground: #fafaf9;
-
     --card: #1c1917;
     --card-foreground: #fafaf9;
-
     --popover: #1c1917;
     --popover-foreground: #fafaf9;
-
     --primary: #3b82f6;
     --primary-foreground: #fafaf9;
-
     --secondary: #292524;
     --secondary-foreground: #fafaf9;
-
     --muted: #292524;
     --muted-foreground: #a8a29e;
-
     --accent: #292524;
     --accent-foreground: #fafaf9;
-
     --destructive: #7f1d1d;
     --destructive-foreground: #fafaf9;
-
     --border: #292524;
     --input: #292524;
     --ring: #3b82f6;
   }
 }
+
+/* Direction-specific styles */
+[dir="rtl"] {
+  /* Arabic text alignment */
+  text-align: right;
+
+  /* Reverse margins for RTL */
+  .ml-auto {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+  }
+
+  .mr-auto {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+
+  /* Icon positioning */
+  .icon-left {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  .icon-right {
+    margin-right: 0;
+    margin-left: 0.5rem;
+  }
+
+  /* Swiper adjustments */
+  .swiper-button-next {
+    transform: rotate(180deg);
+  }
+
+  .swiper-button-prev {
+    transform: rotate(180deg);
+  }
+}
+
+[dir="ltr"] {
+  /* English text alignment */
+  text-align: left;
+
+  /* Default margins */
+  .ml-auto {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+
+  .mr-auto {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+  }
+
+  /* Icon positioning */
+  .icon-left {
+    margin-right: 0;
+    margin-left: 0.5rem;
+  }
+
+  .icon-right {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+}
+
+/* Swiper styles */
 .swiper {
   padding: 50px 0;
 }
+
 .swiper-slide {
   background-position: center;
   background-size: cover;
@@ -77,6 +126,7 @@
   height: 400px;
 }
 
+/* Animations */
 @keyframes pulse {
   0% {
     opacity: 0.5;
@@ -88,6 +138,7 @@
     opacity: 0.5;
   }
 }
+
 .animate-pulse {
   animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -105,11 +156,33 @@
   animation: shimmer 2s infinite linear;
 }
 
+/* Base styles */
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Font families */
+  [dir="rtl"] {
+    font-family: "Cairo", sans-serif;
+  }
+
+  [dir="ltr"] {
+    font-family: "Inter", sans-serif;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  [dir="rtl"],
+  [dir="ltr"] {
+    .mobile-menu {
+      width: 100%;
+      text-align: center;
+    }
   }
 }

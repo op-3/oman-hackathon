@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/context/language-context";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -9,6 +10,8 @@ interface FeatureCardProps {
 }
 
 export function FeatureCard({ icon, title, description }: FeatureCardProps) {
+  const { language } = useLanguage();
+
   return (
     <motion.div whileHover={{ y: -5 }} className="relative group">
       {/* Gradient Background */}
@@ -52,13 +55,17 @@ export function FeatureCard({ icon, title, description }: FeatureCardProps) {
           </p>
 
           {/* Subtle Arrow Decoration */}
-          <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div
+            className={`absolute bottom-4 ${
+              language === "ar" ? "left-4" : "right-4"
+            } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+          >
             <motion.div
               animate={{ x: [0, 5, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
               className="text-blue-500/50"
             >
-              ←
+              {language === "ar" ? "→" : "←"}
             </motion.div>
           </div>
         </div>

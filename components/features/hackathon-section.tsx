@@ -1,8 +1,8 @@
-// components/features/hackathon-section.tsx
 "use client";
 
 import { motion } from "framer-motion";
 import { HackathonCard } from "@/components/public/hackathon-card";
+import { useLanguage } from "@/lib/context/language-context";
 
 interface HackathonSectionProps {
   hackathons: any[];
@@ -17,6 +17,8 @@ export function HackathonSection({
   icon,
   gradientColors,
 }: HackathonSectionProps) {
+  const { language } = useLanguage();
+
   if (hackathons.length === 0) return null;
 
   return (
@@ -54,8 +56,16 @@ export function HackathonSection({
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute left-0 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl -z-10" />
-      <div className="absolute right-0 w-32 h-32 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl -z-10" />
+      <div
+        className={`absolute ${
+          language === "ar" ? "right-0" : "left-0"
+        } w-32 h-32 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl -z-10`}
+      />
+      <div
+        className={`absolute ${
+          language === "ar" ? "left-0" : "right-0"
+        } w-32 h-32 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl -z-10`}
+      />
     </motion.div>
   );
 }

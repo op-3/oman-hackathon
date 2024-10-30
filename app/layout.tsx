@@ -1,4 +1,5 @@
 import { AuthProvider } from "../lib/context/auth-context";
+import { LanguageProvider } from "../lib/context/language-context";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -19,13 +20,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={cairo.className}>
-        <AuthProvider>
-          <Toaster position="top-center" />
-          {children}
-        </AuthProvider>
-      </body>
-    </html>
+    <LanguageProvider>
+      <html>
+        <body className={cairo.className}>
+          <AuthProvider>
+            <Toaster position="top-center" />
+            {children}
+          </AuthProvider>
+        </body>
+      </html>
+    </LanguageProvider>
   );
 }
