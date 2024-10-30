@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { updateHackathon } from "@/lib/firebase/admin";
+import { getHackathonById, updateHackathon } from "@/lib/firebase/admin";
 import {
   uploadImageToStorage,
   deleteImageFromStorage,
@@ -15,35 +15,51 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Loader2 } from "lucide-react";
 
 interface EditHackathonFormProps {
-  initialData: any;
+  id: string;
 }
 
-export default function EditHackathonForm({
-  initialData,
-}: EditHackathonFormProps) {
+export default function EditHackathonForm({ id }: EditHackathonFormProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: initialData.title,
-    description: initialData.description,
-    startDate: new Date(initialData.startDate).toISOString().split("T")[0],
-    endDate: new Date(initialData.endDate).toISOString().split("T")[0],
-    location: initialData.location,
-    organizer: initialData.organizer,
-    registrationLink: initialData.registrationLink,
-    status: initialData.status,
-    imageUrl: initialData.imageUrl,
-  });
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState<HackathonData | null>(null);
+
+  useEffect(() => {
+    const loadHackathon = async () => {
+      try {
+        const data = await getHackathonById(id);
+        if (!data) {
+          router.push("/404");
+          return;
+        }
+
+        setFormData({
+          ...data,
+          startDate: new Date(data.startDate).toISOString().split("T")[0],
+          endDate: new Date(data.endDate).toISOString().split("T")[0],
+        });
+      } catch (error) {
+        toast.error("حدث خطأ في تحميل البيانات");
+        router.push("/404");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHackathon();
+  }, [id, router]);
+
+  if (loading || !formData) {
+    return <div>Loading...</div>;
+  }
 
   const handleImageChange = async (newImageUrl: string) => {
     try {
-      // إذا تم حذف الصورة
       if (!newImageUrl && formData.imageUrl) {
         await deleteImageFromStorage(formData.imageUrl);
       }
 
       setFormData((prev) => ({
-        ...prev,
+        ...prev!,
         imageUrl: newImageUrl,
       }));
     } catch (error) {
@@ -62,7 +78,7 @@ export default function EditHackathonForm({
         return;
       }
 
-      await updateHackathon(initialData.id, {
+      await updateHackathon(id, {
         ...formData,
         startDate: new Date(formData.startDate),
         endDate: new Date(formData.endDate),
@@ -84,7 +100,6 @@ export default function EditHackathonForm({
     <Card>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* مكون رفع الصورة */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               صورة الهاكاثون
@@ -100,7 +115,6 @@ export default function EditHackathonForm({
             </p>
           </div>
 
-          {/* بقية الحقول */}
           <Input
             label="عنوان الهاكاثون"
             value={formData.title}
