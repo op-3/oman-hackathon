@@ -31,8 +31,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    esmExternals: false,
+  env: {
+    DISABLE_ESLINT_PLUGIN: true,
   },
 };
 
