@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "name": "oman-hackathon",
   "version": "0.1.0",
   "private": true,
