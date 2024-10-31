@@ -2,12 +2,12 @@ import { getHackathonById } from "@/lib/firebase/admin";
 import { EditHackathonForm } from "./edit-form";
 import { notFound } from "next/navigation";
 
-type PageProps = {
+interface PageProps {
   params: {
     id: string;
   };
   searchParams?: { [key: string]: string | string[] | undefined };
-};
+}
 
 export default async function EditHackathonPage({ params }: PageProps) {
   try {
