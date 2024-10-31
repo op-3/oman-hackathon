@@ -1,20 +1,15 @@
-import { Suspense } from "react";
-
-interface Props {
+type Props = {
   params: {
     id: string;
   };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+};
 
-export default async function Page({ params, searchParams }: Props) {
-  const { id } = params;
-
+async function HackathonPage({ params }: Props) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <div>
-        <h1>Hackathon {id}</h1>
-      </div>
-    </Suspense>
+    <div>
+      <h1>Hackathon {params.id}</h1>
+    </div>
   );
 }
+
+export default HackathonPage;
