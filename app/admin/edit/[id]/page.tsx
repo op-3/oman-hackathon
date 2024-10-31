@@ -2,21 +2,20 @@ import { getHackathonById } from "@/lib/firebase/admin";
 import { EditHackathonForm } from "./edit-form";
 import { notFound } from "next/navigation";
 
-// تعريف نوع المعاملات بشكل عام
-type PageContext = {
-  params: Record<string, string>;
-  searchParams: Record<string, string | string[]>;
-};
+// نوع مخصص للمعاملات
+interface RouteParams {
+  id: string;
+}
 
-// الدالة الرئيسية للصفحة
-export default async function Page(context: PageContext) {
-  // التحقق من وجود معرف
-  if (!context.params?.id) {
-    return notFound();
-  }
+// نوع مخصص للمكون
+interface EditPageProps {
+  params: RouteParams;
+}
 
+// تغيير تعريف المكون لاستخدام النوع الجديد
+const EditPage = async ({ params }: EditPageProps) => {
   try {
-    const hackathon = await getHackathonById(context.params.id);
+    const hackathon = await getHackathonById(params.id);
 
     if (!hackathon) {
       return notFound();
@@ -34,11 +33,9 @@ export default async function Page(context: PageContext) {
     console.error("Error loading hackathon:", error);
     return notFound();
   }
-}
+};
 
-// إضافة تعريف generateMetadata (اختياري)
-export async function generateMetadata({ params }: PageContext) {
-  return {
-    title: `تعديل الهاكاثون ${params.id}`,
-  };
-}
+// حل مشكلة TypeScript عن طريق تعريف نوع المكون
+EditPage.displayName = "EditHackathonPage";
+
+export default EditPage;
