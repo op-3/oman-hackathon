@@ -1,16 +1,15 @@
 import { getHackathonById } from "@/lib/firebase/admin";
 import { EditHackathonForm } from "./edit-form";
 import { notFound } from "next/navigation";
+import type { EditPageProps } from "./types";
 
-type EditPageProps = {
-  params: { id: string };
-};
-
-async function EditHackathonPage(props: EditPageProps) {
-  const { id } = props.params;
+export default async function Page(props: EditPageProps) {
+  if (!props.params?.id) {
+    return notFound();
+  }
 
   try {
-    const hackathon = await getHackathonById(id);
+    const hackathon = await getHackathonById(props.params.id);
 
     if (!hackathon) {
       return notFound();
@@ -29,5 +28,3 @@ async function EditHackathonPage(props: EditPageProps) {
     return notFound();
   }
 }
-
-export default EditHackathonPage;
