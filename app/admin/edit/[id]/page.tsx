@@ -2,6 +2,8 @@ import { getHackathonById } from "@/lib/firebase/admin";
 import { EditHackathonForm } from "./edit-form";
 import { notFound } from "next/navigation";
 
+export const runtime = "edge"; // إضافة هذا السطر
+
 interface PageProps {
   params: {
     id: string;
