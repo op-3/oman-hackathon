@@ -1,12 +1,16 @@
+// app/admin/edit/[id]/page.tsx
 import { getHackathonById } from "@/lib/firebase/admin";
 import { EditHackathonForm } from "./edit-form";
 import { notFound } from "next/navigation";
 
-export default async function EditHackathonPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+interface PageProps {
+  params: {
+    id: string;
+  };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+export default async function EditHackathonPage({ params }: PageProps) {
   try {
     const hackathon = await getHackathonById(params.id);
 
