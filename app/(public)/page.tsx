@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   motion,
   useScroll,
@@ -202,7 +202,7 @@ export default function HomePage() {
     });
   };
 
-  const loadHackathons = async () => {
+  const loadHackathons = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllHackathons();
@@ -217,7 +217,7 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [language]);
 
   useEffect(() => {
     AOS.init({
@@ -226,7 +226,7 @@ export default function HomePage() {
       easing: "ease-out",
     });
     loadHackathons();
-  }, []);
+  }, [loadHackathons]);
 
   useEffect(() => {
     let filtered = [...hackathons];
