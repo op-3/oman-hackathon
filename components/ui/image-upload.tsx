@@ -5,7 +5,7 @@ import { Upload, X, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { uploadImageToStorage } from "@/lib/firebase/storage";
-import { auth } from "@/lib/firebase/config"; // إضافة هذا الاستيراد
+import { auth } from "@/lib/firebase/config";
 import toast from "react-hot-toast";
 
 interface ImageUploadProps {
@@ -23,6 +23,42 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const handleFileUpload = useCallback(
+    async (file?: File) => {
+      if (!file) return;
+
+      try {
+        setLoading(true);
+
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error("حجم الملف يجب أن يكون أقل من 5 ميجابايت");
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          toast.error("يجب أن يكون الملف صورة");
+          return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+          toast.error("يجب تسجيل الدخول أولاً");
+          return;
+        }
+
+        const imageUrl = await uploadImageToStorage(file);
+        onChange(imageUrl);
+        toast.success("تم رفع الصورة بنجاح");
+      } catch (error: any) {
+        console.error("Error uploading image:", error);
+        toast.error(error.message || "حدث خطأ أثناء رفع الصورة");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onChange]
+  );
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -45,7 +81,7 @@ export function ImageUpload({
       const file = e.dataTransfer.files?.[0];
       await handleFileUpload(file);
     },
-    [disabled]
+    [disabled, handleFileUpload]
   );
 
   const handleChange = useCallback(
@@ -53,41 +89,8 @@ export function ImageUpload({
       const file = e.target.files?.[0];
       await handleFileUpload(file);
     },
-    []
+    [handleFileUpload]
   );
-
-  const handleFileUpload = async (file?: File) => {
-    if (!file) return;
-
-    try {
-      setLoading(true);
-
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("حجم الملف يجب أن يكون أقل من 5 ميجابايت");
-        return;
-      }
-
-      if (!file.type.startsWith("image/")) {
-        toast.error("يجب أن يكون الملف صورة");
-        return;
-      }
-
-      const user = auth.currentUser;
-      if (!user) {
-        toast.error("يجب تسجيل الدخول أولاً");
-        return;
-      }
-
-      const imageUrl = await uploadImageToStorage(file);
-      onChange(imageUrl);
-      toast.success("تم رفع الصورة بنجاح");
-    } catch (error: any) {
-      console.error("Error uploading image:", error);
-      toast.error(error.message || "حدث خطأ أثناء رفع الصورة");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleRemove = useCallback(
     (e: React.MouseEvent) => {
