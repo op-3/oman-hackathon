@@ -2,15 +2,21 @@ import { getHackathonById } from "@/lib/firebase/admin";
 import { EditHackathonForm } from "./edit-form";
 import { notFound } from "next/navigation";
 
-interface Params {
-  id: string;
-}
+// تعريف نوع المعاملات بشكل عام
+type PageContext = {
+  params: Record<string, string>;
+  searchParams: Record<string, string | string[]>;
+};
 
-async function EditPage({ params }: { params: Params }) {
-  const { id } = params;
+// الدالة الرئيسية للصفحة
+export default async function Page(context: PageContext) {
+  // التحقق من وجود معرف
+  if (!context.params?.id) {
+    return notFound();
+  }
 
   try {
-    const hackathon = await getHackathonById(id);
+    const hackathon = await getHackathonById(context.params.id);
 
     if (!hackathon) {
       return notFound();
@@ -30,4 +36,9 @@ async function EditPage({ params }: { params: Params }) {
   }
 }
 
-export default EditPage;
+// إضافة تعريف generateMetadata (اختياري)
+export async function generateMetadata({ params }: PageContext) {
+  return {
+    title: `تعديل الهاكاثون ${params.id}`,
+  };
+}
