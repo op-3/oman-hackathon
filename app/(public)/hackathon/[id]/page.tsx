@@ -1,10 +1,11 @@
-type Props = {
-  params: {
-    id: string;
-  };
+import type { PageProps } from "./types";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Hackathon Details",
 };
 
-async function HackathonPage({ params }: Props) {
+export default function Page({ params }: PageProps) {
   return (
     <div>
       <h1>Hackathon {params.id}</h1>
@@ -12,4 +13,5 @@ async function HackathonPage({ params }: Props) {
   );
 }
 
-export default HackathonPage;
+// إضافة اسم العرض
+Page.displayName = "HackathonPage";
