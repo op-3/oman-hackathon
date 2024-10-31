@@ -1,19 +1,17 @@
+// app/admin/edit/[id]/page.tsx
 import { getHackathonById } from "@/lib/firebase/admin";
 import { EditHackathonForm } from "./edit-form";
 import { notFound } from "next/navigation";
 
-// نوع مخصص للمعاملات
-interface RouteParams {
+export async function generateStaticParams() {
+  return [];
+}
+
+interface EditParams {
   id: string;
 }
 
-// نوع مخصص للمكون
-interface EditPageProps {
-  params: RouteParams;
-}
-
-// تغيير تعريف المكون لاستخدام النوع الجديد
-const EditPage = async ({ params }: EditPageProps) => {
+export default async function EditPage({ params }: { params: EditParams }) {
   try {
     const hackathon = await getHackathonById(params.id);
 
@@ -33,9 +31,8 @@ const EditPage = async ({ params }: EditPageProps) => {
     console.error("Error loading hackathon:", error);
     return notFound();
   }
-};
+}
 
-// حل مشكلة TypeScript عن طريق تعريف نوع المكون
-EditPage.displayName = "EditHackathonPage";
-
-export default EditPage;
+// إضافة تعريف صريح لمتغيرات البيئة المطلوبة
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
