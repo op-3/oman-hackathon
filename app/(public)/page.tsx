@@ -185,8 +185,8 @@ export default function HomePage() {
 
   // Parallax scroll effects
   const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-  const heroY = useTransform(scrollY, [0, 300], [0, 150]);
+  const heroOpacity = useTransform(scrollY, [0, 900], [1, 0]);
+  const heroY = useTransform(scrollY, [0, 900], [0, 150]);
   const sortHackathons = (hackathons: any[]) => {
     return [...hackathons].sort((a, b) => {
       const statusOrder = {

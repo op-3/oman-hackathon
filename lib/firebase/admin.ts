@@ -22,7 +22,7 @@ export async function addHackathon(data: any) {
       throw new Error("جميع الحقول المطلوبة يجب أن تكون موجودة");
     }
 
-    // تنسيق البيانات
+  
     const hackathonData = {
       title: data.title,
       description: data.description,
@@ -44,7 +44,6 @@ export async function addHackathon(data: any) {
       updatedAt: Timestamp.now(),
     };
 
-    // إضافة الوثيقة إلى Firestore
     const hackathonsRef = collection(db, "hackathons");
     const docRef = await addDoc(hackathonsRef, hackathonData);
 

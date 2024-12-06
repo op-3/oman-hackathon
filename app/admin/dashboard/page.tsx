@@ -150,6 +150,7 @@ export default function DashboardPage() {
                         <Link
                           href={`/admin/edit/${hackathon.id}`}
                           className="text-blue-600 hover:text-blue-900 transition-colors"
+                          prefetch={true} // إضافة prefetch للتحميل المسبق
                         >
                           تعديل
                         </Link>
